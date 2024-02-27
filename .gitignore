@@ -1,5 +1,10 @@
+# WDL things
 dx_compile/
+
+# Things used to make docker images
 plink2
+PRSice_linux
+
 .Renviron
 
 # Byte-compiled / optimized / DLL files

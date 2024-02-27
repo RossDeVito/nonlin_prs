@@ -3,6 +3,8 @@ version 1.0
 workflow gwas_plink2 {
     input {
         File geno_pgen_file
+        File geno_psam_file
+        File geno_pvar_file
         File covar_file
         File pheno_file
         File split_file
@@ -11,6 +13,8 @@ workflow gwas_plink2 {
     call gwas_plink2_task {
         input:
             geno_pgen_file = geno_pgen_file,
+            geno_psam_file = geno_psam_file,
+            geno_pvar_file = geno_pvar_file,
             covar_file = covar_file,
             pheno_file = pheno_file,
             split_file = split_file
@@ -29,6 +33,8 @@ workflow gwas_plink2 {
 task gwas_plink2_task {
     input {
         File geno_pgen_file
+        File geno_psam_file
+        File geno_pvar_file
         File covar_file
         File pheno_file
         File split_file
@@ -39,7 +45,9 @@ task gwas_plink2_task {
         START_TIME=$(date +%s)
 
         plink2 --glm 'hide-covar' \
-            --pfile ~{geno_pgen_file} \
+            --pgen ~{geno_pgen_file} \
+            --pvar ~{geno_pvar_file} \
+            --psam ~{geno_psam_file} \
             --keep ~{split_file} \
             --covar ~{covar_file} \
             --pheno ~{pheno_file} \
