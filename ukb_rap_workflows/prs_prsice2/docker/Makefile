@@ -2,7 +2,7 @@
 
 # Definitions
 project_id = ucsd-medicine-cast
-identifier = nonlin_prs_wrapper_prsice2
+identifier = nonlin_prs_prs_prsice2
 version = 0.0.1
 
 # GCR prefix
@@ -14,6 +14,7 @@ tag = $(version)
 
 # Build
 build:
+	cp ../../../scripts/prs/fit_wrapper.py .
 	docker build \
 		--progress=plain \
 		--platform linux/amd64 \

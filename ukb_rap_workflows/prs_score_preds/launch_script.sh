@@ -1,3 +1,5 @@
+MODEL_TYPE=prsice
+
 PHENO=standing_height_50
 # PHENO=body_fat_percentage_23099
 # PHENO=platelet_count_30080
@@ -12,4 +14,4 @@ else
 fi
 
 # Launch GWAS workflow
-python launcher.py -p ${PHENO} ${WB_ONLY_FLAG}
+python launcher.py -m ${MODEL_TYPE} -p ${PHENO} ${WB_ONLY_FLAG}

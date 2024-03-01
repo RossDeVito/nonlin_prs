@@ -12,6 +12,7 @@ workflow prs_prsice2 {
         File pheno_file
         File covar_file
         File keep_file
+        File pred_file
     }
 
     call prs_prsice2_task {
@@ -25,13 +26,14 @@ workflow prs_prsice2 {
             sum_stats_file = sum_stats_file,
             pheno_file = pheno_file,
             covar_file = covar_file,
-            keep_file = keep_file
+            keep_file = keep_file,
+            pred_file = pred_file
     }
 
     output {
-        Array[File] prsice2_output = prs_prsice2_task.prsice2_output
-        Array[File] prsice2_score_output = prs_prsice2_task.prsice2_score_output
-        File runtime_json = prs_prsice2_task.runtime_json
+        Array[File] prsice2_logging_output = prs_prsice2_task.logging_output
+        File prsice2_score_output = prs_prsice2_task.score_output
+        File prsice2_runtime_json = prs_prsice2_task.runtime_json
     }
 
     meta {
@@ -51,6 +53,7 @@ task prs_prsice2_task {
         File pheno_file
         File covar_file
         File keep_file
+        File pred_file
     }
 
     command <<<
@@ -100,10 +103,8 @@ task prs_prsice2_task {
             --thread ${N_THREADS} \
             --out prs_prsice2
 
-        # Save runtime as JSON as 'runtime_seconds' key
         END_TIME=$(date +%s)
-        ELAPSED_TIME=$((END_TIME-START_TIME))
-        echo "{\"runtime_seconds\": $ELAPSED_TIME}" > runtime.json
+        PRSICE_RUNTIME=$((END_TIME-START_TIME))
 
         # Get best p-value threshold from PRSice2 output and make input
         # file for plink2 scoring
@@ -127,10 +128,32 @@ task prs_prsice2_task {
             --bim ~{geno_bim_file_all} \
             --fam ~{geno_fam_file_all} \
             --score ~{sum_stats_file} 3 7 12 header \
-            --extract prs_prsice2_clump.clumped \
+            --extract prs_prsice2_clump.clumps \
             --q-score-range prsice2_best_p_thresh.txt \
                 ~{sum_stats_file} 3 15 header \
             --out prs_prsice2_score
+
+        # Fit wrapper with python3 script. Saves runtime
+        CURRENT_DIR=$(pwd)
+
+        START_TIME=$(date +%s)
+
+        python3 /home/fit_wrapper.py \
+            --pheno-file ~{pheno_file} \
+            --covar-file ~{covar_file} \
+            --score-file prs_prsice2_score.best_p.sscore \
+            --val-iids ~{keep_file} \
+            --test-iids ~{pred_file} \
+            --out-dir $CURRENT_DIR
+
+        END_TIME=$(date +%s)
+        FIT_WRAPPER_RUNTIME=$((END_TIME-START_TIME))
+
+        # Save runtime as JSON with total time as 'runtime_seconds' key,
+        # and individual times as 'prsice_runtime_seconds' and
+        # 'wrapper_runtime_seconds' keys
+        TOTAL_RUNTIME=$((PRSICE_RUNTIME+FIT_WRAPPER_RUNTIME))
+        echo "{\"runtime_seconds\": $TOTAL_RUNTIME, \"prsice_runtime_seconds\": $PRSICE_RUNTIME, \"wrapper_runtime_seconds\": $FIT_WRAPPER_RUNTIME}" > runtime.json
     >>>
 
     runtime {
@@ -138,8 +161,10 @@ task prs_prsice2_task {
     }
 
     output {
-        Array[File] prsice2_output = glob("prs_prsice2*")
-        Array[File] prsice2_score_output = glob("prs_prsice2_score*")
+        Array[File] logging_output = glob("*.log")
+        File score_output = "prs_prsice2_score.best_p.sscore"
+        File val_preds = "val_preds.csv"
+        File test_preds = "test_preds.csv"
         File runtime_json = "runtime.json"
     }
 }

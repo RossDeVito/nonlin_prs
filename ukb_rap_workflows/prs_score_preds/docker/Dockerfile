@@ -16,10 +16,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libpng-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy in plink2 binary from local directory
-COPY plink2 /usr/local/bin/plink2
-
-# Install python and libraries needed to fit wrapper
+# Install Python
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     python3 \
     python3-distutils \
@@ -27,7 +24,14 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 	python3-pip python3-setuptools && \
 	rm -rf /var/lib/apt/lists/*
 
+# Install Python packages
 RUN pip3 install --no-cache-dir \
-    numpy \
-    pandas \
-    scikit-learn
+	matplotlib \
+	numpy \
+	pandas \
+	scikit-learn \
+	scipy \
+	seaborn
+
+# Copy in score_preds.py from local directory
+COPY score_preds.py /home/score_preds.py

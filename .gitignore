@@ -4,8 +4,10 @@ dx_compile/
 # Things used to make docker images
 plink2
 PRSice_linux
+docker/**/*.py
 
-.Renviron
+# Temp files
+tmp/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

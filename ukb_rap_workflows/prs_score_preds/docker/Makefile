@@ -1,8 +1,8 @@
-# docker run -it --rm gcr.io/ucsd-medicine-cast/nonlin_prs_prs_prsice2:latest /bin/bash
+# docker run -it --rm gcr.io/ucsd-medicine-cast/nonlin_prs_prs_score_preds:latest /bin/bash
 
 # Definitions
 project_id = ucsd-medicine-cast
-identifier = nonlin_prs_prs_prsice2
+identifier = nonlin_prs_prs_score_preds
 version = 0.0.1
 
 # GCR prefix
@@ -14,6 +14,7 @@ tag = $(version)
 
 # Build
 build:
+	cp ../../../scripts/prs/score_preds.py .
 	docker build \
 		--progress=plain \
 		--platform linux/amd64 \

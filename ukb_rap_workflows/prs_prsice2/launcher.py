@@ -47,7 +47,7 @@ import json
 import dxpy
 
 
-WORKFLOW_ID = 'workflow-GgQVy28Jv7BKQ92QzQf3yK1z'
+WORKFLOW_ID = 'workflow-GgQbzg8Jv7BK0YvYjPJK91Q8'
 DEFAULT_INSTANCE = 'mem2_ssd1_v2_x32'
 
 
@@ -127,6 +127,7 @@ def launch_prsice2_workflow(
 	pheno_file,
 	covar_file,
 	keep_file,
+	pred_file,
 	output_dir,
 	workflow_id=WORKFLOW_ID,
 	instance_type=DEFAULT_INSTANCE,
@@ -145,7 +146,10 @@ def launch_prsice2_workflow(
 		sum_stats_file: Path to the summary statistics file in UKB RAP storage.
 		pheno_file: Path to the phenotype file in UKB RAP storage.
 		covar_file: Path to the covariate file in UKB RAP storage.
-		keep_file: Path to the keep file in UKB RAP storage.
+		keep_file: Path to the keep file in UKB RAP storage. Samples in this
+			file will be used to fit the PRSice2 model.
+		pred_file: Path to the pred file in UKB RAP storage. Samples in this
+			file will have scores predicted for them, but will not be fit on.
 		output_dir: Path to the output directory in UKB RAP storage.
 		workflow_id: ID of the PRSice2 C+T PRS workflow.
 		instance_type: Instance type to use for the workflow.
@@ -226,6 +230,13 @@ def launch_prsice2_workflow(
 			project=dxpy.PROJECT_CONTEXT_ID
 		))[0]['id']
 	)
+	pred_link = dxpy.dxlink(
+		list(dxpy.find_data_objects(
+			name=pred_file.split('/')[-1],
+			folder='/'.join(pred_file.split('/')[:-1]),
+			project=dxpy.PROJECT_CONTEXT_ID
+		))[0]['id']
+	)
 
 	# Set up workflow input
 	prefix = 'stage-common.'
@@ -239,7 +250,8 @@ def launch_prsice2_workflow(
 		f'{prefix}sum_stats_file': sum_stats_link,
 		f'{prefix}pheno_file': pheno_link,
 		f'{prefix}covar_file': covar_link,
-		f'{prefix}keep_file': keep_link
+		f'{prefix}keep_file': keep_link,
+		f'{prefix}pred_file': pred_link,
 	}
 
 	# Run workflow
@@ -308,19 +320,25 @@ if __name__ == '__main__':
 	print(f'Summary statistics file: {sum_stats_file}')
 
 	# Set path to keep file containing sample IDs to keep
-	if args.wb:
-		if args.dev:
+	# and pred file containing sample IDs to predict for but not fit on
+	if args.dev:
+		if args.wb:
 			keep_fname = 'val_wb_dev.txt'
+			pred_fname = 'test_wb_dev.txt'
 		else:
-			keep_fname = 'val_wb.txt'
-	else:
-		if args.dev:
 			keep_fname = 'val_all_dev.txt'
+			pred_fname = 'test_all_dev.txt'
+	else:
+		if args.wb:
+			keep_fname = 'val_wb.txt'
 		else:
 			keep_fname = 'val_all.txt'
+		pred_fname = 'test_all.txt'
 
 	keep_file = f'{args.splits_dir}/{keep_fname}'
+	pred_file = f'{args.splits_dir}/{pred_fname}'
 	print(f'Keep file: {keep_file}')
+	print(f'Pred file: {pred_file}')
 
 	# Set the output directory
 	output_dir = f'{args.output_dir}/{args.pheno_name}'
@@ -345,6 +363,7 @@ if __name__ == '__main__':
 		pheno_file=f'{args.pheno_dir}/{args.pheno_name}.pheno',
 		covar_file=f'{args.covar_dir}/{covar_set}.tsv',
 		keep_file=keep_file,
+		pred_file=pred_file,
 		output_dir=output_dir,
 		name=job_name,
 	)
