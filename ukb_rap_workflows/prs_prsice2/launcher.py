@@ -47,7 +47,7 @@ import json
 import dxpy
 
 
-WORKFLOW_ID = 'workflow-GgKkKqjJv7B54Fzp95BGK5k8'
+WORKFLOW_ID = 'workflow-GgQVy28Jv7BKQ92QzQf3yK1z'
 DEFAULT_INSTANCE = 'mem2_ssd1_v2_x32'
 
 
@@ -121,7 +121,8 @@ def parse_args():
 
 
 def launch_prsice2_workflow(
-	geno_prefix,
+	geno_prefix_val,
+	geno_prefix_all,
 	sum_stats_file,
 	pheno_file,
 	covar_file,
@@ -134,8 +135,13 @@ def launch_prsice2_workflow(
 	"""Launch PRSice2 C+T PRS workflow on UKB RAP.
 	
 	Args:
-		geno_prefix: Path to the genotype file prefix in UKB RAP storage.
-			The filename should exclude the .bed/.bim/.fam extensions.
+		geno_prefix_val: Path to the genotype file prefix in UKB RAP storage
+			for the validation set the PRSice2 will fit on. The filename
+			should exclude the .bed/.bim/.fam extensions.
+		geno_prefix_all: Path to the genotype file prefix in UKB RAP storage
+			for the full dataset. Used to compute PRS scores for all samples
+			before wrapper is applied. The filename should exclude the
+			.bed/.bim/.fam extensions.
 		sum_stats_file: Path to the summary statistics file in UKB RAP storage.
 		pheno_file: Path to the phenotype file in UKB RAP storage.
 		covar_file: Path to the covariate file in UKB RAP storage.
@@ -150,24 +156,45 @@ def launch_prsice2_workflow(
 	workflow = dxpy.dxworkflow.DXWorkflow(dxid=workflow_id)
 
 	# Get data links for inputs
-	geno_bed_link = dxpy.dxlink(
+	geno_bed_link_val = dxpy.dxlink(
 		list(dxpy.find_data_objects(
-			name=geno_prefix.split('/')[-1] + '.bed',
-			folder='/'.join(geno_prefix.split('/')[:-1]),
+			name=geno_prefix_val.split('/')[-1] + '.bed',
+			folder='/'.join(geno_prefix_val.split('/')[:-1]),
 			project=dxpy.PROJECT_CONTEXT_ID
 		))[0]['id']
 	)
-	geno_bim_link = dxpy.dxlink(
+	geno_bim_link_val = dxpy.dxlink(
 		list(dxpy.find_data_objects(
-			name=geno_prefix.split('/')[-1] + '.bim',
-			folder='/'.join(geno_prefix.split('/')[:-1]),
+			name=geno_prefix_val.split('/')[-1] + '.bim',
+			folder='/'.join(geno_prefix_val.split('/')[:-1]),
 			project=dxpy.PROJECT_CONTEXT_ID
 		))[0]['id']
 	)
-	geno_fam_link = dxpy.dxlink(
+	geno_fam_link_val = dxpy.dxlink(
 		list(dxpy.find_data_objects(
-			name=geno_prefix.split('/')[-1] + '.fam',
-			folder='/'.join(geno_prefix.split('/')[:-1]),
+			name=geno_prefix_val.split('/')[-1] + '.fam',
+			folder='/'.join(geno_prefix_val.split('/')[:-1]),
+			project=dxpy.PROJECT_CONTEXT_ID
+		))[0]['id']
+	)
+	geno_bed_link_all = dxpy.dxlink(
+		list(dxpy.find_data_objects(
+			name=geno_prefix_all.split('/')[-1] + '.bed',
+			folder='/'.join(geno_prefix_all.split('/')[:-1]),
+			project=dxpy.PROJECT_CONTEXT_ID
+		))[0]['id']
+	)
+	geno_bim_link_all = dxpy.dxlink(
+		list(dxpy.find_data_objects(
+			name=geno_prefix_all.split('/')[-1] + '.bim',
+			folder='/'.join(geno_prefix_all.split('/')[:-1]),
+			project=dxpy.PROJECT_CONTEXT_ID
+		))[0]['id']
+	)
+	geno_fam_link_all = dxpy.dxlink(
+		list(dxpy.find_data_objects(
+			name=geno_prefix_all.split('/')[-1] + '.fam',
+			folder='/'.join(geno_prefix_all.split('/')[:-1]),
 			project=dxpy.PROJECT_CONTEXT_ID
 		))[0]['id']
 	)
@@ -203,9 +230,12 @@ def launch_prsice2_workflow(
 	# Set up workflow input
 	prefix = 'stage-common.'
 	workflow_input = {
-		f'{prefix}geno_bed_file': geno_bed_link,
-		f'{prefix}geno_bim_file': geno_bim_link,
-		f'{prefix}geno_fam_file': geno_fam_link,
+		f'{prefix}geno_bed_file_val': geno_bed_link_val,
+		f'{prefix}geno_bim_file_val': geno_bim_link_val,
+		f'{prefix}geno_fam_file_val': geno_fam_link_val,
+		f'{prefix}geno_bed_file_all': geno_bed_link_all,
+		f'{prefix}geno_bim_file_all': geno_bim_link_all,
+		f'{prefix}geno_fam_file_all': geno_fam_link_all,
 		f'{prefix}sum_stats_file': sum_stats_link,
 		f'{prefix}pheno_file': pheno_link,
 		f'{prefix}covar_file': covar_link,
@@ -245,17 +275,22 @@ if __name__ == '__main__':
 	# Set genotype data paths
 	if args.wb:
 		if args.dev:
-			bed_fname = 'allchr_wbqc_dev'
+			bed_fname_val = 'allchr_wbqc_dev'
+			bed_fname_all = 'allchr_wbqc_dev'
 		else:
-			bed_fname = 'allchr_wbqc_val'
+			bed_fname_val = 'allchr_wbqc_val'
+			bed_fname_all = 'allchr_wbqc'
 	else:
 		if args.dev:
-			bed_fname = 'allchr_allqc_dev'
+			bed_fname_val = 'allchr_allqc_dev'
+			bed_fname_all = 'allchr_allqc_dev'
 		else:
-			bed_fname = 'allchr_allqc_val'
+			bed_fname_val = 'allchr_allqc_val'
+			bed_fname_all = 'allchr_allqc'
 
-	geno_prefix = f'{args.geno_dir}/{bed_fname}'
-	print(f'Genotype file prefix: {geno_prefix}')
+	geno_prefix_val = f'{args.geno_dir}/{bed_fname_val}'
+	geno_prefix_all = f'{args.geno_dir}/{bed_fname_all}'
+	print(f'Genotype file prefix (val): {bed_fname_val}')
 
 	# Set path to summary statistics file from GWAS
 	if args.wb:
@@ -304,7 +339,8 @@ if __name__ == '__main__':
 
 	print(f'Launching PRSice2 workflow with name: {job_name}')
 	launch_prsice2_workflow(
-		geno_prefix=geno_prefix,
+		geno_prefix_val=geno_prefix_val,
+		geno_prefix_all=geno_prefix_all,
 		sum_stats_file=sum_stats_file,
 		pheno_file=f'{args.pheno_dir}/{args.pheno_name}.pheno',
 		covar_file=f'{args.covar_dir}/{covar_set}.tsv',
