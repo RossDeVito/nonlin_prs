@@ -16,6 +16,8 @@ Optional args:
 
 * --wb: Flag to use just the white British subset of the UKB data.
 	False when not provided.
+* -l, --large-instance: Flag to use a larger instance type. False when not
+	provided.
 * --pheno-dir: Directory containing the phenotype files. Default:
 	'/rdevito/nonlin_prs/data/pheno_data/pheno'
 * --pheno-metadata-file: File containing the phenotype metadata.
@@ -49,6 +51,7 @@ import dxpy
 
 WORKFLOW_ID = 'workflow-Gj6yq88Jv7BBG3K4J3K5kv1Q'
 DEFAULT_INSTANCE = 'mem3_ssd1_v2_x64'
+LARGE_INSTANCE = 'mem3_ssd1_v2_x96'
 
 
 def parse_args():
@@ -80,6 +83,11 @@ def parse_args():
 		'--wb',
 		action='store_true',
 		help='Flag to use just the white British subset of the UKB data.'
+	)
+	parser.add_argument(
+		'-l', '--large-instance',
+		action='store_true',
+		help='Flag to use a larger instance type. False when not provided.'
 	)
 	parser.add_argument(
 		'--pheno-dir',
@@ -157,7 +165,8 @@ def launch_automl_prs_workflow(
 	test_samp_file,
 	train_config_path,
 	output_dir,
-	job_name='fit_prs_automl'
+	job_name='fit_prs_automl',
+	instance_type=DEFAULT_INSTANCE,
 ):
 	"""Launch AutoML-PRS fitting.
 
@@ -202,7 +211,7 @@ def launch_automl_prs_workflow(
 		workflow_input,
 		folder=output_dir,
 		name=job_name,
-		instance_type=DEFAULT_INSTANCE,
+		instance_type=instance_type,
 		priority='high',
 		ignore_reuse=True
 	)
@@ -262,6 +271,13 @@ if __name__ == '__main__':
 
 	print(f'Output directory: {output_dir}')
 
+	# Set instance type
+	if args.large_instance:
+		instance_type = LARGE_INSTANCE
+	else:
+		instance_type = DEFAULT_INSTANCE
+	print(f'Instance type: {instance_type}')
+
 	# Launch workflow
 	job_name = f'prs_automl_{desc}'
 	print(f'Launching AutoML-PRS workflow with name: {job_name}')
@@ -276,7 +292,8 @@ if __name__ == '__main__':
 		test_samp_file=test_samp_fname,
 		train_config_path=f'{args.model_config_dir}/{args.model_config}.json',
 		output_dir=output_dir,
-		job_name=job_name
+		job_name=job_name,
+		instance_type=instance_type
 	)
 
-
+	print()

@@ -4,6 +4,6 @@
 	"task": "regression",
 	"time_budget": 86400,
 	"early_stopping": true,
-	"p_val": "1e-8",
-	"window": "0"
+	"p_val": "basil",
+	"window": "included"
 }

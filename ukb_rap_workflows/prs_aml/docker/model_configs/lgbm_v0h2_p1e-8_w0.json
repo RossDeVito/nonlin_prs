@@ -1,9 +1,0 @@
-{
-	"model_type": "lgbm",
-	"metric": "r2",
-	"task": "regression",
-	"time_budget": 7200,
-	"early_stopping": true,
-	"p_val": "1e-8",
-	"window": "0"
-}

@@ -1,9 +1,9 @@
 {
-	"model_type": "elastic_net",
+	"model_type": "npart_elastic_net",
 	"metric": "r2",
 	"task": "regression",
 	"time_budget": 86400,
 	"early_stopping": true,
-	"p_val": "1e-8",
-	"window": "0"
+	"p_val": "clump",
+	"window": "lead"
 }

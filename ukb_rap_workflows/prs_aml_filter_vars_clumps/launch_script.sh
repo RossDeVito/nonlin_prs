@@ -3,7 +3,7 @@ PHENO=standing_height_50
 # PHENO=platelet_count_30080
 # PHENO=glycated_haemoglobin_30750
 
-WB_ONLY=false
+WB_ONLY=true
 
 if [ "$WB_ONLY" = true ]; then
 	WB_ONLY_FLAG="--wb"
@@ -12,4 +12,5 @@ else
 fi
 
 # Launch GWAS workflow
-python launcher.py -p ${PHENO} ${WB_ONLY_FLAG}
+python launcher.py \
+	-p ${PHENO} ${WB_ONLY_FLAG} 

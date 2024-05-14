@@ -1,4 +1,8 @@
-MODEL_TYPE=prsice
+# MODEL_TYPE=prsice
+MODEL_TYPE=basil_lasso
+
+# MODEL_TYPE=automl_max35000_v2_lgbm_v0h24
+# MODEL_TYPE=automl_max35000_v2_npart_elastic_net_v0h24
 
 PHENO=standing_height_50
 # PHENO=body_fat_percentage_23099

@@ -1,0 +1,1 @@
+Filter input variants to autoML PRS to those used by PRSice2. Uses docker container from prs_aml_filter_vars.

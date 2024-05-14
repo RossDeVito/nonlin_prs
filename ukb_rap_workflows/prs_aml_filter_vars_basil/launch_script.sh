@@ -1,5 +1,5 @@
-PHENO=standing_height_50
-# PHENO=body_fat_percentage_23099
+# PHENO=standing_height_50
+PHENO=body_fat_percentage_23099
 # PHENO=platelet_count_30080
 # PHENO=glycated_haemoglobin_30750
 
@@ -12,4 +12,5 @@ else
 fi
 
 # Launch GWAS workflow
-python launcher.py -p ${PHENO} ${WB_ONLY_FLAG}
+python launcher.py \
+	-p ${PHENO} ${WB_ONLY_FLAG} 

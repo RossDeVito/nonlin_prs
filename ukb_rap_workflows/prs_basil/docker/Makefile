@@ -1,8 +1,8 @@
-# docker run -it --rm gcr.io/ucsd-medicine-cast/nonlin_prs_gwas_plink2:latest /bin/bash
+# docker run -it --rm gcr.io/ucsd-medicine-cast/nonlin_prs_prs_basil:latest /bin/bash
 
 # Definitions
 project_id = ucsd-medicine-cast
-identifier = nonlin_prs_gwas_plink2
+identifier = nonlin_prs_prs_basil
 version = 0.0.1
 
 # GCR prefix
@@ -15,6 +15,7 @@ tag = $(version)
 # Build
 build:
 	cp ../../resources/plink2 .
+	cp ../../../scripts/prs/run_basil.R .
 	docker build \
 		--progress=plain \
 		--platform linux/amd64 \

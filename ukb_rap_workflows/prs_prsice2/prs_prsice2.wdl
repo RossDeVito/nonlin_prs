@@ -34,6 +34,10 @@ workflow prs_prsice2 {
         Array[File] prsice2_logging_output = prs_prsice2_task.logging_output
         File prsice2_score_output = prs_prsice2_task.score_output
         File prsice2_runtime_json = prs_prsice2_task.runtime_json
+        File val_preds = prs_prsice2_task.val_preds
+        File test_preds = prs_prsice2_task.test_preds
+        File prsice2_clumps = prs_prsice2_task.clumps
+        File prsice2_best_thresh = prs_prsice2_task.best_thresh
     }
 
     meta {
@@ -166,5 +170,7 @@ task prs_prsice2_task {
         File val_preds = "val_preds.csv"
         File test_preds = "test_preds.csv"
         File runtime_json = "runtime.json"
+        File clumps = "prs_prsice2_clump.clumps"
+        File best_thresh = "prsice2_best_p_thresh.txt"
     }
 }

@@ -44,8 +44,8 @@ import json
 import dxpy
 
 
-WORKFLOW_ID = 'workflow-GgKXpk8Jv7BBFbGbPJzp97by'
-DEFAULT_INSTANCE = 'mem2_ssd1_v2_x32'
+WORKFLOW_ID = 'workflow-GgvFP80Jv7BFqBjk7V171335'
+DEFAULT_INSTANCE = 'mem3_ssd1_v2_x64'
 
 
 def parse_args():

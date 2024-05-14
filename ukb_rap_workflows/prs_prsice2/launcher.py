@@ -1,6 +1,6 @@
 """Launch PRSice2 C+T PRS workflow.
 
-Used BED input genotype file.
+Uses BED input genotype file.
 
 Required args:
 
@@ -47,8 +47,8 @@ import json
 import dxpy
 
 
-WORKFLOW_ID = 'workflow-GgQbzg8Jv7BK0YvYjPJK91Q8'
-DEFAULT_INSTANCE = 'mem2_ssd1_v2_x32'
+WORKFLOW_ID = 'workflow-GjQv0BjJv7B90q8GpqyKYzx9'
+DEFAULT_INSTANCE = 'mem3_ssd1_v2_x64'
 
 
 def parse_args():
@@ -260,6 +260,7 @@ def launch_prsice2_workflow(
 		folder=output_dir,
 		name=name,
 		instance_type=instance_type,
+		ignore_reuse=True
 	)
 	print("Started analysis %s (%s)\n"%(analysis.get_id(), name))
 

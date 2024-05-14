@@ -4,6 +4,6 @@
 	"task": "regression",
 	"time_budget": 86400,
 	"early_stopping": true,
-	"p_val": "1e-11",
-	"window": "250000"
+	"p_val": "clump",
+	"window": "lead"
 }

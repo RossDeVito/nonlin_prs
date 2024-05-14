@@ -5,6 +5,7 @@ dx_compile/
 plink2
 PRSice_linux
 docker/**/*.py
+docker/**/*.R
 
 # Temp files
 tmp/

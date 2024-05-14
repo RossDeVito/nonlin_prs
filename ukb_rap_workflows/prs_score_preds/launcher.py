@@ -2,7 +2,11 @@
 
 Required args:
 
-* -m, --model-type: Model type. One of "prsice" or "basil"
+* -m, --model-type: Model type. One of "prsice" "basil_lasso", "basil_ridge",
+	"basil_elastic_net_0_1", "basil_elastic_net_0_5", "basil_elastic_net_0_9",
+	or starts with 'automl' and overall is 'automl_{desc}' where 
+	'/rdevito/nonlin_prs/automl_prs/output/{pheno-name}[_wb]_{desc}' is the
+	output directory.
 * -p, --pheno-name: Phenotype name
 
 Optional args:
@@ -14,7 +18,7 @@ import argparse
 import dxpy
 
 
-WORKFLOW_ID = 'workflow-GgQgb00Jv7BJqj1qP1XXfyzF'
+WORKFLOW_ID = 'workflow-Ggx3J6QJv7BGzvQzq6xfz534'
 DEFAULT_INSTANCE = 'mem1_ssd1_v2_x2'
 
 PHENO_DIR = '/rdevito/nonlin_prs/data/pheno_data/pheno'
@@ -26,7 +30,6 @@ def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
 		'-m', '--model-type',
-		choices=['prsice', 'basil'],
 		required=True,
 		help='Model type'
 	)
@@ -88,6 +91,7 @@ def launch_workflow(
 		folder=model_dir,
 		name=name,
 		instance_type=instance_type,
+		ignore_reuse=True
 	)
 	print("Started analysis %s (%s)\n"%(analysis.get_id(), name))
 
@@ -104,8 +108,27 @@ if __name__ == '__main__':
 		model_dir = f'{model_out_dir}/{args.pheno_name}'
 		if args.wb:
 			model_dir = f'{model_dir}_wb'
-	elif args.model_type == 'basil':
-		raise NotImplementedError('BASIL model not yet supported')
+	# If first part of args.model_type is 'basil'
+	elif args.model_type.startswith('basil'):
+		model_out_dir = '/rdevito/nonlin_prs/batch_iterative_prs/output/'
+		fname = args.pheno_name
+		if args.wb:
+			fname = f'{fname}_wb'
+		
+		if args.model_type == 'basil_lasso':
+			model_dir = f'{model_out_dir}/{fname}_lasso'
+		elif args.model_type == 'basil_ridge':
+			model_dir = f'{model_out_dir}/{fname}_ridge'
+		else:
+			raise ValueError(f'Invalid model type: {args.model_type}')
+	# If first part of args.model_type is 'automl'
+	elif args.model_type.startswith('automl'):
+		model_out_dir = '/rdevito/nonlin_prs/automl_prs/output'
+		model_desc = '_'.join(args.model_type.split('_')[1:])
+		model_dir = f'{model_out_dir}/{args.pheno_name}'
+		if args.wb:
+			model_dir = f'{model_dir}_wb'
+		model_dir = f'{model_dir}_{model_desc}'
 	else:
 		raise ValueError(f'Invalid model type: {args.model_type}')
 	

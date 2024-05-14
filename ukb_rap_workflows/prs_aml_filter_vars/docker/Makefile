@@ -1,8 +1,8 @@
-# docker run -it --rm gcr.io/ucsd-medicine-cast/nonlin_prs_gwas_plink2:latest /bin/bash
+# docker run -it --rm gcr.io/ucsd-medicine-cast/nonlin_prs_prs_aml_filter_vars:latest /bin/bash
 
 # Definitions
 project_id = ucsd-medicine-cast
-identifier = nonlin_prs_gwas_plink2
+identifier = nonlin_prs_prs_aml_filter_vars
 version = 0.0.1
 
 # GCR prefix
@@ -18,6 +18,7 @@ build:
 	docker build \
 		--progress=plain \
 		--platform linux/amd64 \
+		--build-arg CACHEBUST=$(date +%s) \
 		-t $(name):$(tag) .
 	docker tag $(name):$(tag) $(name):latest
 
